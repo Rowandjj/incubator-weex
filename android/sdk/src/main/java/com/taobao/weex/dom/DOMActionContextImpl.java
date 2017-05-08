@@ -241,21 +241,11 @@ class DOMActionContextImpl implements DOMActionContext {
     }
   }
 
-  private ArrayList<IWXRenderTask> mCopiedTasks = new ArrayList<>();
-
   void consumeRenderTasks() {
-    if(mNormalTasks.isEmpty() && !mCopiedTasks.isEmpty()) {
-      mNormalTasks.addAll(mCopiedTasks);
-    }
     int count = mNormalTasks.size();
     for (int i = 0; i < count && !mDestroy; ++i) {
       mWXRenderManager.runOnThread(mInstanceId, mNormalTasks.get(i));
     }
-
-    if(mCopiedTasks.isEmpty() && !mNormalTasks.isEmpty()) {
-      mCopiedTasks.addAll(mNormalTasks);
-    }
-
     mNormalTasks.clear();
   }
 

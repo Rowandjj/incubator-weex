@@ -117,9 +117,6 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
     public void destroy() {
         //remove 缓存
         IPreRenderCache cache = WXSDKManager.getInstance().getPreRenderCache();
-        //TODO 仅当前instance
-        cache.clear();
-
         if(!mCachedParams.isEmpty()) {
             for(Params params : mCachedParams) {
                 cache.remove(params.targetUrl);
