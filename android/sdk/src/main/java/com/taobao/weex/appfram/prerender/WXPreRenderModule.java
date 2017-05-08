@@ -13,6 +13,7 @@ import com.taobao.weex.bridge.JSCallback;
 import com.taobao.weex.common.WXRenderStrategy;
 import com.taobao.weex.utils.WXLogUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +32,18 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
     private static final long DEFAULT_CACHE_TTL = 5 * 60 * 1000;
     private static final int DEFAULT_VERSION = 0;
 
-    private String mTargetUrl;
-    private Map<String,Object> mOptions;
+
+    private static class Params {
+        String targetUrl;
+        Map<String,Object> options;
+
+        Params(String targetUrl, Map<String,Object> options) {
+            this.targetUrl = targetUrl;
+            this.options = options;
+        }
+    }
+
+    private final List<Params> mCachedParams = new ArrayList<>();
 
     /**
      * @param targetUrl 待preRender的页面
@@ -42,16 +53,18 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
      * @param callback  callback
      */
     @JSMethod
-    public void addTask(@Nullable final String targetUrl, @Nullable final Map<String, Object> options, @Nullable final JSCallback callback) {
+    public void addTask(@Nullable  String targetUrl, @Nullable  Map<String, Object> options, @Nullable  JSCallback callback) {
         if (TextUtils.isEmpty(targetUrl) || mWXSDKInstance == null || mWXSDKInstance.getContext() == null) {
             WXLogUtils.e(TAG, "add task failed. [url:" + targetUrl + ",instance:" + mWXSDKInstance + "]");
             return;
         }
-        this.mTargetUrl = targetUrl;
-        this.mOptions = options;
 
+        mCachedParams.add(new Params(targetUrl,options));
         //TODO if cache exist,return
+        addTaskInternal(targetUrl,options,callback);
+    }
 
+    private void addTaskInternal(@NonNull final String targetUrl, @Nullable final Map<String, Object> options,@Nullable final JSCallback callback) {
         WXSDKInstance newInstance = new WXSDKInstance(mWXSDKInstance.getContext());
         newInstance.setPreRenderMode(true);
         newInstance.setLayoutFinishListener(new LayoutFinishListener() {
@@ -107,13 +120,23 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
         //TODO 仅当前instance
         cache.clear();
 
+        if(!mCachedParams.isEmpty()) {
+            for(Params params : mCachedParams) {
+                cache.remove(params.targetUrl);
+            }
+            mCachedParams.clear();
+        }
     }
 
     @Override
     public void onActivityResume() {
         super.onActivityResume();
         //refresh
-        addTask(mTargetUrl,mOptions,null);
+        if(!mCachedParams.isEmpty()) {
+            for(Params params : mCachedParams) {
+                addTaskInternal(params.targetUrl,params.options,null);
+            }
+        }
     }
 
     @NonNull
