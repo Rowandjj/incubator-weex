@@ -37,12 +37,13 @@ public class PreRenderManager {
             return null;
         }
         IPreRenderCache cache = WXSDKManager.getInstance().getPreRenderCache();
-        IPreRenderCache.Entry entry = cache.get(targetUrl);
-        if(!entry.isFresh()) {
-            cache.remove(targetUrl);
-            listener.onException(entry.data,"-1","instance is not fresh");
-            return null;
-        }
+//        IPreRenderCache.Entry entry = cache.get(targetUrl);
+//        if(!entry.isFresh()) {
+//            cache.remove(targetUrl);
+//            listener.onException(entry.data,"-1","instance is not fresh");
+//            return null;
+//        }
+        IPreRenderCache.Entry entry = cache.remove(targetUrl);
 
         //TODO 版本校验等等
         WXSDKInstance cachedInstance = entry.data;

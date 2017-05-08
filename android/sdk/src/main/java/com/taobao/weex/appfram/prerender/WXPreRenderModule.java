@@ -31,6 +31,9 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
     private static final long DEFAULT_CACHE_TTL = 5 * 60 * 1000;
     private static final int DEFAULT_VERSION = 0;
 
+    private String mTargetUrl;
+    private Map<String,Object> mOptions;
+
     /**
      * @param targetUrl 待preRender的页面
      * @param options   扩展参数 { ignore_params:['foo','bar'], version: 1.0
@@ -44,12 +47,13 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
             WXLogUtils.e(TAG, "add task failed. [url:" + targetUrl + ",instance:" + mWXSDKInstance + "]");
             return;
         }
+        this.mTargetUrl = targetUrl;
+        this.mOptions = options;
 
         //TODO if cache exist,return
 
         WXSDKInstance newInstance = new WXSDKInstance(mWXSDKInstance.getContext());
         newInstance.setPreRenderMode(true);
-        newInstance.setRenderFromCache(true);
         newInstance.setLayoutFinishListener(new LayoutFinishListener() {
             @Override
             public void onLayoutFinish(@NonNull WXSDKInstance instance) {
@@ -98,7 +102,18 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
 
     @Override
     public void destroy() {
+        //remove 缓存
+        IPreRenderCache cache = WXSDKManager.getInstance().getPreRenderCache();
+        //TODO 仅当前instance
+        cache.clear();
 
+    }
+
+    @Override
+    public void onActivityResume() {
+        super.onActivityResume();
+        //refresh
+        addTask(mTargetUrl,mOptions,null);
     }
 
     @NonNull

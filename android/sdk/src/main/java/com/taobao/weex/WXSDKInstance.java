@@ -136,7 +136,6 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
   private List<OnWXScrollListener> mWXScrollListeners;
 
   private volatile boolean isPreRenderMode;
-  private volatile boolean isRenderFromCache;
 
   private LayoutFinishListener mLayoutFinishListener;
 
@@ -252,13 +251,6 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
 //    },0);
   }
 
-  public void setRenderFromCache(boolean renderFromCache) {
-    this.isRenderFromCache = renderFromCache;
-  }
-
-  public boolean isRenderFromCache() {
-    return this.isRenderFromCache;
-  }
 
   public void setLayoutFinishListener(@Nullable LayoutFinishListener listener) {
     this.mLayoutFinishListener = listener;
@@ -1156,9 +1148,6 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
   }
 
   public synchronized void destroy() {
-    if(isRenderFromCache) {
-      return;
-    }
     WXSDKManager.getInstance().destroyInstance(mInstanceId);
     WXComponentFactory.removeComponentTypesByInstanceId(getInstanceId());
 
