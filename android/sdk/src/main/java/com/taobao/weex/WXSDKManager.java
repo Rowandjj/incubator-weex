@@ -34,6 +34,8 @@ import com.taobao.weex.adapter.IWXSoLoaderAdapter;
 import com.taobao.weex.adapter.IWXUserTrackAdapter;
 import com.taobao.weex.adapter.URIAdapter;
 import com.taobao.weex.appfram.navigator.IActivityNavBarSetter;
+import com.taobao.weex.appfram.prerender.PreRenderCacheFactory;
+import com.taobao.weex.appfram.prerender.IPreRenderCache;
 import com.taobao.weex.appfram.storage.DefaultWXStorage;
 import com.taobao.weex.appfram.storage.IWXStorageAdapter;
 import com.taobao.weex.appfram.websocket.IWebSocketAdapter;
@@ -73,6 +75,7 @@ public class WXSDKManager {
   private IWXHttpAdapter mIWXHttpAdapter;
   private IWXDebugAdapter mIWXDebugAdapter;
   private IActivityNavBarSetter mActivityNavBarSetter;
+  private IPreRenderCache mPreRenderCache;
 
 
 
@@ -322,6 +325,14 @@ public class WXSDKManager {
     return mIWXSoLoaderAdapter;
   }
 
+  @NonNull
+  public IPreRenderCache getPreRenderCache() {
+    if(mPreRenderCache == null){
+      mPreRenderCache = PreRenderCacheFactory.createDefault();
+    }
+    return mPreRenderCache;
+  }
+
   void setInitConfig(InitConfig config){
     this.mIWXDebugAdapter = config.getDebugAdapter();
     this.mIWXHttpAdapter = config.getHttpAdapter();
@@ -333,6 +344,7 @@ public class WXSDKManager {
     this.mIWebSocketAdapterFactory = config.getWebSocketAdapterFactory();
     this.mIWXJSExceptionAdapter = config.getJSExceptionAdapter();
     this.mIWXSoLoaderAdapter = config.getIWXSoLoaderAdapter();
+    this.mPreRenderCache = config.getPreRenderCache();
   }
 
   public IWXDebugAdapter getIWXDebugAdapter() {

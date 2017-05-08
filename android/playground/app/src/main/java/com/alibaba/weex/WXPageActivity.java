@@ -58,6 +58,8 @@ import com.taobao.weex.RenderContainer;
 import com.taobao.weex.WXSDKEngine;
 import com.taobao.weex.WXSDKInstance;
 import com.taobao.weex.appfram.navigator.IActivityNavBarSetter;
+import com.taobao.weex.appfram.prerender.PreRenderManager;
+import com.taobao.weex.appfram.prerender.SimpleRenderListener;
 import com.taobao.weex.common.IWXDebugProxy;
 import com.taobao.weex.common.WXRenderStrategy;
 import com.taobao.weex.dom.ImmutableDomObject;
@@ -142,8 +144,35 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
     }else if (TextUtils.equals("http", mUri.getScheme()) || TextUtils.equals("https", mUri.getScheme())) {
       // if url has key "_wx_tpl" then get weex bundle js
       String weexTpl = mUri.getQueryParameter(Constants.WEEX_TPL_KEY);
-      String url = TextUtils.isEmpty(weexTpl) ? mUri.toString() : weexTpl;
-      loadWXfromService(url);
+      final String url = TextUtils.isEmpty(weexTpl) ? mUri.toString() : weexTpl;
+
+      //TODO orange 配置
+      if(PreRenderManager.isCacheExist(url)) {
+        mInstance = PreRenderManager.renderFromCache(this, url, new SimpleRenderListener() {
+          @Override
+          public void onViewCreated(WXSDKInstance instance, View view) {
+            //TODO 不合理，应该使用新的renderContainer
+            if(view.getParent() != null) {
+              ((ViewGroup)view.getParent()).removeView(view);
+            }
+
+            mContainer.addView(view);
+            WXLogUtils.e("CHUYI","load from preRender!!!!");
+            Toast.makeText(WXPageActivity.this,"preRender success",Toast.LENGTH_SHORT).show();
+          }
+
+          @Override
+          public void onException(WXSDKInstance instance, String errCode, String msg) {
+            Toast.makeText(WXPageActivity.this,"preRender failed! \nmsg:"+msg,Toast.LENGTH_SHORT).show();
+            loadWXfromService(url);
+          }
+        });
+
+      } else {
+        loadWXfromService(url);
+        mInstance.onActivityCreate();
+      }
+
       startHotRefresh();
     } else {
       loadWXfromLocal(false);

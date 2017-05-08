@@ -133,6 +133,22 @@ public final class WXDomManager {
     }
   }
 
+  void pureRender(String instanceId) {
+    //TODO 是否可以直接调用batch() ???
+    throwIfNotDomThread();
+//    Iterator<Entry<String, DOMActionContextImpl>> iterator = mDomRegistries.entrySet().iterator();
+//    while (iterator.hasNext()) {
+//      iterator.next().getValue().consumeRenderTasks();
+//    }
+
+    DOMActionContextImpl context = mDomRegistries.get(instanceId);
+    if(context != null) {
+      context.consumeRenderTasks();
+    }
+
+  }
+
+
   private void throwIfNotDomThread(){
     if (!isDomThread()) {
       throw new WXRuntimeException("dom operation must be done in dom thread");
@@ -181,5 +197,14 @@ public final class WXDomManager {
     task.args.add(createContext);
     msg.obj = task;
     sendMessageDelayed(msg, delay);
+  }
+
+  public void postRenderTask(String instanceId) {
+    Message msg = Message.obtain();
+    msg.what = WXDomHandler.MsgType.WX_CONSUME_RENDER_TASKS;
+    WXDomTask task = new WXDomTask();
+    task.instanceId = instanceId;
+    msg.obj = task;
+    sendMessage(msg);
   }
 }

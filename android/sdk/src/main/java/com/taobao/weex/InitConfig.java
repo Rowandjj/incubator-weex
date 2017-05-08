@@ -26,6 +26,7 @@ import com.taobao.weex.adapter.IWXJSExceptionAdapter;
 import com.taobao.weex.adapter.IWXSoLoaderAdapter;
 import com.taobao.weex.adapter.IWXUserTrackAdapter;
 import com.taobao.weex.adapter.URIAdapter;
+import com.taobao.weex.appfram.prerender.IPreRenderCache;
 import com.taobao.weex.appfram.storage.IWXStorageAdapter;
 import com.taobao.weex.appfram.websocket.IWebSocketAdapterFactory;
 
@@ -43,6 +44,7 @@ public class InitConfig {
   private URIAdapter mURIAdapter;
   private IWebSocketAdapterFactory webSocketAdapterFactory;
   private IWXJSExceptionAdapter mJSExceptionAdapter;
+  private IPreRenderCache mPreRenderCache;
   private String framework;
 
   public IWXHttpAdapter getHttpAdapter() {
@@ -67,6 +69,10 @@ public class InitConfig {
 
   public IWXSoLoaderAdapter getIWXSoLoaderAdapter() {
     return soLoader;
+  }
+
+  public IPreRenderCache getPreRenderCache() {
+    return mPreRenderCache;
   }
 
   public String getFramework() {
@@ -104,6 +110,7 @@ public class InitConfig {
     IWXJSExceptionAdapter mJSExceptionAdapter;
     String framework;
     IWebSocketAdapterFactory webSocketAdapterFactory;
+    IPreRenderCache preRenderCache;
     public Builder(){
 
     }
@@ -163,6 +170,11 @@ public class InitConfig {
       return this;
     }
 
+    public Builder setPreRenderCache(IPreRenderCache cache) {
+      this.preRenderCache = cache;
+      return this;
+    }
+
     public InitConfig build(){
       InitConfig config =  new InitConfig();
       config.httpAdapter = this.httpAdapter;
@@ -176,6 +188,7 @@ public class InitConfig {
       config.mURIAdapter = this.mURIAdapter;
       config.webSocketAdapterFactory = this.webSocketAdapterFactory;
       config.mJSExceptionAdapter=this.mJSExceptionAdapter;
+      config.mPreRenderCache = this.preRenderCache;
       return config;
     }
   }

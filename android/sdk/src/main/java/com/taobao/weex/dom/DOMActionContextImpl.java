@@ -65,7 +65,7 @@ class DOMActionContextImpl implements DOMActionContext {
   private WXDomObject.Consumer mUnregisterDomConsumer;
   private String mInstanceId;
   private WXRenderManager mWXRenderManager;
-  private ArrayList<IWXRenderTask> mNormalTasks;
+  private ArrayList<IWXRenderTask> mNormalTasks;//需要一直存储
   private Set <Pair<String, Map<String, Object>>> animations;
   private CSSLayoutContext mLayoutContext;
   private volatile boolean mDirty;
@@ -227,17 +227,36 @@ class DOMActionContextImpl implements DOMActionContext {
     }
     parseAnimation();
 
-    int count = mNormalTasks.size();
-    for (int i = 0; i < count && !mDestroy; ++i) {
-      mWXRenderManager.runOnThread(mInstanceId, mNormalTasks.get(i));
+
+    boolean isPreRenderMode = instance != null && instance.isPreRenderMode();
+    if(!isPreRenderMode) {
+      consumeRenderTasks();
     }
-    mNormalTasks.clear();
+
     mAddDom.clear();
     animations.clear();
     mDirty = false;
     if (instance != null) {
       instance.batchTime(System.currentTimeMillis() - start0);
     }
+  }
+
+  private ArrayList<IWXRenderTask> mCopiedTasks = new ArrayList<>();
+
+  void consumeRenderTasks() {
+    if(mNormalTasks.isEmpty() && !mCopiedTasks.isEmpty()) {
+      mNormalTasks.addAll(mCopiedTasks);
+    }
+    int count = mNormalTasks.size();
+    for (int i = 0; i < count && !mDestroy; ++i) {
+      mWXRenderManager.runOnThread(mInstanceId, mNormalTasks.get(i));
+    }
+
+    if(mCopiedTasks.isEmpty() && !mNormalTasks.isEmpty()) {
+      mCopiedTasks.addAll(mNormalTasks);
+    }
+
+    mNormalTasks.clear();
   }
 
   private class ApplyUpdateConsumer implements WXDomObject.Consumer{
