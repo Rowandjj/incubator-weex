@@ -146,12 +146,14 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
       String weexTpl = mUri.getQueryParameter(Constants.WEEX_TPL_KEY);
       final String url = TextUtils.isEmpty(weexTpl) ? mUri.toString() : weexTpl;
 
-      //TODO orange 配置
-      if(PreRenderManager.isCacheExist(url)) {
-        mInstance = PreRenderManager.renderFromCache(this, url, new SimpleRenderListener() {
+
+      //todo orange
+      WXSDKInstance cachedInstance = PreRenderManager.takeCachedInstance(url);
+      if(cachedInstance != null) {
+        mInstance = cachedInstance;
+        PreRenderManager.renderFromCache(this,cachedInstance,new SimpleRenderListener() {
           @Override
           public void onViewCreated(WXSDKInstance instance, View view) {
-            //TODO 不合理，应该使用新的renderContainer
             if(view.getParent() != null) {
               ((ViewGroup)view.getParent()).removeView(view);
             }
@@ -167,10 +169,8 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
             loadWXfromService(url);
           }
         });
-
       } else {
         loadWXfromService(url);
-        mInstance.onActivityCreate();
       }
 
       startHotRefresh();
