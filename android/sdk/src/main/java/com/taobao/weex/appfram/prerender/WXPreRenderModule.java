@@ -1,6 +1,7 @@
 package com.taobao.weex.appfram.prerender;
 
 import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 
 import com.taobao.weex.WXSDKEngine;
@@ -8,8 +9,6 @@ import com.taobao.weex.annotation.JSMethod;
 import com.taobao.weex.bridge.JSCallback;
 import com.taobao.weex.utils.WXLogUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +21,7 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
 
     private static final String TAG = "WXPreRenderModule";
 
-    private final List<Params> mCachedParams = new ArrayList<>();
+    private final ArrayMap<String/*url*/,Params> mCachedParams = new ArrayMap<>();
 
     /**
      * @param targetUrl 待preRender的页面
@@ -39,9 +38,11 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
             return;
         }
 
-        mCachedParams.add(new Params(targetUrl,options));
-        //TODO if cache exist,return
-        PreRenderManager.getInstance().addTaskInternal(mWXSDKInstance.getContext(),targetUrl,options,callback);
+        mCachedParams.put(targetUrl, new Params(targetUrl,options));//old value will be replaced
+
+        //TODO 是否需要先检查下缓存?
+
+        PreRenderManager.getInstance().addTaskInternal(mWXSDKInstance.getContext(),targetUrl,options,callback,false);
     }
 
     @Override
@@ -49,8 +50,8 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
         //remove 缓存
         IPreRenderCache cache = PreRenderManager.getInstance().getInternalCache();
         if(!mCachedParams.isEmpty()) {
-            for(Params params : mCachedParams) {
-                cache.remove(params.targetUrl);
+            for(String url : mCachedParams.keySet()) {
+                cache.remove(url);
             }
             mCachedParams.clear();
         }
@@ -61,8 +62,10 @@ public class WXPreRenderModule extends WXSDKEngine.DestroyableModule {
         super.onActivityResume();
         //refresh
         if(!mCachedParams.isEmpty()) {
-            for(Params params : mCachedParams) {
-                PreRenderManager.getInstance().addTaskInternal(mWXSDKInstance.getContext(),params.targetUrl,params.options,null);
+            for (int i = 0; i < mCachedParams.size(); i++) {
+                String url = mCachedParams.keyAt(i);
+                Params params = mCachedParams.valueAt(i);
+                PreRenderManager.getInstance().addTaskInternal(mWXSDKInstance.getContext(),url,params.options,null,true);
             }
         }
     }

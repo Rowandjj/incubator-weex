@@ -70,7 +70,7 @@ public class PreRenderManager {
         if(TextUtils.isEmpty(targetUrl)) {
             return null;
         }
-        IPreRenderCache.Entry entry = mInternalCache.remove(targetUrl);
+        IPreRenderCache.Entry entry = mInternalCache.get(targetUrl);
         if(entry != null && entry.data != null && entry.isFresh()) {
             return entry.data;
         } else {
@@ -114,7 +114,13 @@ public class PreRenderManager {
 
     /*******************internal usage*********************/
 
-    void addTaskInternal(@NonNull final Context context, @NonNull final String targetUrl, @Nullable final Map<String, Object> options, @Nullable final JSCallback callback) {
+    @NonNull
+    IPreRenderCache getInternalCache() {
+        return mInternalCache;
+    }
+
+    void addTaskInternal(@NonNull final Context context, @NonNull final String targetUrl, @Nullable final Map<String, Object> options,
+                         @Nullable final JSCallback callback, final boolean isResumeState) {
         if(!mRemoteConfig.isSwitchOn()) {
             return;
         }
@@ -123,8 +129,8 @@ public class PreRenderManager {
         newInstance.setLayoutFinishListener(new LayoutFinishListener() {
             @Override
             public void onLayoutFinish(@NonNull WXSDKInstance instance) {
-                if(isCacheGranted()) {
-                    mInternalCache.put(targetUrl, createEntry(instance, options));
+                if(isCacheGranted() || isResumeState) {
+                    saveEntryToCache(targetUrl,instance,options);
                     if (callback != null) {
                         fireEvent(callback,targetUrl,"success","success");
                     }
@@ -180,9 +186,14 @@ public class PreRenderManager {
         return result;
     }
 
-    @NonNull
-    IPreRenderCache getInternalCache() {
-        return mInternalCache;
+    private void saveEntryToCache(@NonNull String targetUrl,@NonNull WXSDKInstance instance,@Nullable Map<String,Object> options) {
+        IPreRenderCache.Entry evictEntry = mInternalCache.remove(targetUrl);
+        IPreRenderCache.Entry newEntry = createEntry(instance,options);
+        if(evictEntry != null) {
+            //防止resume时，时间戳被错误更新
+            newEntry.lastModified = evictEntry.lastModified;
+        }
+        mInternalCache.put(targetUrl, newEntry);
     }
 
     @NonNull
