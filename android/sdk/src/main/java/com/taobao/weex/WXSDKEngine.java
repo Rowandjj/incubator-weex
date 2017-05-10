@@ -34,6 +34,7 @@ import com.taobao.weex.appfram.clipboard.WXClipboardModule;
 import com.taobao.weex.appfram.navigator.IActivityNavBarSetter;
 import com.taobao.weex.appfram.navigator.WXNavigatorModule;
 import com.taobao.weex.appfram.pickers.WXPickersModule;
+import com.taobao.weex.appfram.prerender.WXPreRenderModule;
 import com.taobao.weex.appfram.storage.IWXStorageAdapter;
 import com.taobao.weex.appfram.storage.WXStorageModule;
 import com.taobao.weex.appfram.websocket.WebSocketModule;
@@ -296,7 +297,7 @@ public class WXSDKEngine {
       registerModule("picker", WXPickersModule.class);
       registerModule("meta", WXMetaModule.class,true);
       registerModule("webSocket", WebSocketModule.class);
-
+      registerModule("prerender", WXPreRenderModule.class);
 
       registerDomObject(simpleList, WXListDomObject.class);
       registerDomObject(WXBasicComponentType.INDICATOR, WXIndicator.IndicatorDomNode.class);

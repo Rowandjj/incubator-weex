@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -39,6 +40,7 @@ import com.taobao.weex.adapter.IWXHttpAdapter;
 import com.taobao.weex.adapter.IWXImgLoaderAdapter;
 import com.taobao.weex.adapter.IWXUserTrackAdapter;
 import com.taobao.weex.adapter.URIAdapter;
+import com.taobao.weex.appfram.prerender.LayoutFinishListener;
 import com.taobao.weex.appfram.websocket.IWebSocketAdapter;
 import com.taobao.weex.bridge.NativeInvokeHelper;
 import com.taobao.weex.bridge.SimpleJSCallback;
@@ -132,6 +134,10 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
   private WXScrollViewListener mWXScrollViewListener;
 
   private List<OnWXScrollListener> mWXScrollListeners;
+
+  private volatile boolean isPreRenderMode;
+
+  private LayoutFinishListener mLayoutFinishListener;
 
   /**
    * If anchor is created manually(etc. define a layout xml resource ),
@@ -230,6 +236,32 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
     init(context);
   }
 
+
+  public boolean isPreRenderMode() {
+    return this.isPreRenderMode;
+  }
+
+  public void setPreRenderMode(final boolean isPreRenderMode) {
+    WXSDKManager.getInstance().getWXRenderManager().postOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        WXSDKInstance.this.isPreRenderMode = isPreRenderMode;
+      }
+    },0);
+  }
+
+
+  public void setLayoutFinishListener(@Nullable LayoutFinishListener listener) {
+    this.mLayoutFinishListener = listener;
+  }
+
+  public LayoutFinishListener getLayoutFinishListener() {
+    return this.mLayoutFinishListener;
+  }
+
+  public void replaceContext(@NonNull Context context) {
+    this.mContext = context;
+  }
 
   public WXComponent getRootComponent() {
     return mRootComp;
