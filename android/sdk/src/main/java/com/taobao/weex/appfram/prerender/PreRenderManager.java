@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description:
- *
- *
  * Created by rowandjj(chuyi)<br/>
  */
 
@@ -62,7 +59,7 @@ public class PreRenderManager {
      * @return 若缓存中存在且足够"新鲜"，则返回{@link WXSDKInstance}实例，否则返回null。
      * */
     @Nullable
-    public WXSDKInstance takeCachedInstance(@Nullable String targetUrl) {
+    public WXSDKInstance takeCachedInstance(String targetUrl) {
         if(!mRemoteConfig.isSwitchOn()) {
             return null;
         }
@@ -87,7 +84,7 @@ public class PreRenderManager {
      * @param cachedInstance 缓存中的{@link WXSDKInstance}实例，由方法{@link PreRenderManager#takeCachedInstance(String)}返回
      * @param listener 渲染结果的回调
      * */
-    public void renderFromCache(@Nullable Context context, @Nullable WXSDKInstance cachedInstance, @Nullable IWXRenderListener listener) {
+    public void renderFromCache(Context context, WXSDKInstance cachedInstance, IWXRenderListener listener) {
         if(!mRemoteConfig.isSwitchOn()) {
             WXLogUtils.d(TAG,"renderFromCache failed. switch is off");
             return;
