@@ -15,7 +15,7 @@ public class FakePreRenderConfig implements IPreRenderConfig {
 
     @Override
     public long getTTL() {
-        return DEFAULT_CACHE_TTL;
+        return 1000*5;
     }
 
     @Override

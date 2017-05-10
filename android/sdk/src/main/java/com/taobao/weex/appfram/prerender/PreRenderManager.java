@@ -27,7 +27,7 @@ import java.util.Map;
  */
 
 public class PreRenderManager {
-    private static final String TAG = "PreRenderManager";
+    private static final String TAG = WXPreRenderModule.TAG;
 
     private static final String DEFAULT_VERSION = "1.0";
 
@@ -64,7 +64,6 @@ public class PreRenderManager {
     @Nullable
     public WXSDKInstance takeCachedInstance(@Nullable String targetUrl) {
         if(!mRemoteConfig.isSwitchOn()) {
-            WXLogUtils.d(TAG,"takeCachedInstance failed. switch is off");
             return null;
         }
         if(TextUtils.isEmpty(targetUrl)) {
@@ -74,6 +73,9 @@ public class PreRenderManager {
         if(entry != null && entry.data != null && entry.isFresh()) {
             return entry.data;
         } else {
+            if(WXEnvironment.isApkDebugable() && entry!=null) {
+                WXLogUtils.d(TAG,"takeCachedInstance return null.[fresh:"+entry.isFresh()+"]");
+            }
             return null;
         }
     }
@@ -122,37 +124,39 @@ public class PreRenderManager {
     void addTaskInternal(@NonNull final Context context, @NonNull final String targetUrl, @Nullable final Map<String, Object> options,
                          @Nullable final JSCallback callback, final boolean isResumeState) {
         if(!mRemoteConfig.isSwitchOn()) {
+            WXLogUtils.d(TAG,"addTask failed. switch is off");
             return;
         }
+        if(!isResumeState && !isCacheGranted()) {
+            if(callback != null) {
+                fireEvent(callback,targetUrl,"failed","cache_num_exceed");
+            }
+            if(WXEnvironment.isApkDebugable()) {
+                WXLogUtils.d(TAG,"preRender failed because of exceed max cache num. [targetUrl:"+targetUrl+"]");
+            }
+
+            //TODO remove later
+            Toast.makeText(context,"create task failed,exceed cache num",Toast.LENGTH_SHORT).show();
+
+            return;
+        }
+        WXLogUtils.d(TAG,"add task begin. url is "+targetUrl);
         WXSDKInstance newInstance = new WXSDKInstance(context);
         newInstance.setPreRenderMode(true);
         newInstance.setLayoutFinishListener(new LayoutFinishListener() {
             @Override
             public void onLayoutFinish(@NonNull WXSDKInstance instance) {
-                if(isCacheGranted() || isResumeState) {
-                    saveEntryToCache(targetUrl,instance,options);
-                    if (callback != null) {
-                        fireEvent(callback,targetUrl,"success","success");
-                    }
-
-                    if(WXEnvironment.isApkDebugable()) {
-                        WXLogUtils.d(TAG,"preRender success. [targetUrl:"+targetUrl+"]");
-                    }
-
-                    //TODO remove later
-                    Toast.makeText(context,"create task success",Toast.LENGTH_SHORT).show();
-                } else {
-                    if(callback != null) {
-                        fireEvent(callback,targetUrl,"failed","cache_num_exceed");
-                    }
-
-                    if(WXEnvironment.isApkDebugable()) {
-                        WXLogUtils.d(TAG,"preRender failed because of exceed max cache num. [targetUrl:"+targetUrl+"]");
-                    }
-
-                    //TODO remove later
-                    Toast.makeText(context,"create task failed,exceed cache num",Toast.LENGTH_SHORT).show();
+                saveEntryToCache(targetUrl,instance,options);
+                if (callback != null) {
+                    fireEvent(callback,targetUrl,"success","success");
                 }
+
+                if(WXEnvironment.isApkDebugable()) {
+                    WXLogUtils.d(TAG,"preRender success. [targetUrl:"+targetUrl+"]");
+                }
+
+                //TODO remove later
+                Toast.makeText(context,"create task success",Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -181,7 +185,7 @@ public class PreRenderManager {
         int size = mInternalCache.size();
         boolean result = size < mRemoteConfig.getMaxCacheNum();
         if(WXEnvironment.isApkDebugable()) {
-            WXLogUtils.d("cacheGranted:"+result+" [current size:"+size+",max size:"+mRemoteConfig.getMaxCacheNum()+"]");
+            WXLogUtils.d(TAG,"cacheGranted:"+result+" [current size:"+size+",max size:"+mRemoteConfig.getMaxCacheNum()+"]");
         }
         return result;
     }
@@ -210,7 +214,7 @@ public class PreRenderManager {
             for (Map.Entry<String, Object> en : options.entrySet()) {
                 if ("ignore_params".equals(en.getKey()) && en.getValue() != null && en.getValue() instanceof List) {
                     //attention:可能存在其他数据类型
-                    newEntry.ignoreParams = (List<String>) en.getValue();
+                    newEntry.ignoreParams = Collections.unmodifiableList((List<String>) en.getValue());
                 } else if("version".equals(en.getKey()) && en.getValue() != null && en.getValue() instanceof String) {
                     newEntry.version = (String) en.getValue();
                 }
