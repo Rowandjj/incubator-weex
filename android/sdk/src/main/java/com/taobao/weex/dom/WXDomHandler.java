@@ -73,7 +73,7 @@ public class WXDomHandler implements Handler.Callback {
         mHasBatch = false;
         break;
       case MsgType.WX_CONSUME_RENDER_TASKS:
-        mWXDomManager.pureRender(task.instanceId);
+        mWXDomManager.consumeRenderTask(task.instanceId);
         break;
       default:
         break;

@@ -322,7 +322,6 @@ public class WXSDKManager {
     return mIWXSoLoaderAdapter;
   }
 
-
   void setInitConfig(InitConfig config){
     this.mIWXDebugAdapter = config.getDebugAdapter();
     this.mIWXHttpAdapter = config.getHttpAdapter();

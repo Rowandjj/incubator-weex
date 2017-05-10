@@ -65,7 +65,7 @@ class DOMActionContextImpl implements DOMActionContext {
   private WXDomObject.Consumer mUnregisterDomConsumer;
   private String mInstanceId;
   private WXRenderManager mWXRenderManager;
-  private ArrayList<IWXRenderTask> mNormalTasks;//需要一直存储
+  private ArrayList<IWXRenderTask> mNormalTasks;
   private Set <Pair<String, Map<String, Object>>> animations;
   private CSSLayoutContext mLayoutContext;
   private volatile boolean mDirty;

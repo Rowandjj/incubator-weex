@@ -241,14 +241,13 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
     return this.isPreRenderMode;
   }
 
-  public void setPreRenderMode(boolean isPreRenderMode) {
-    this.isPreRenderMode = isPreRenderMode;
-//    WXSDKManager.getInstance().getWXRenderManager().postOnUiThread(new Runnable() {
-//      @Override
-//      public void run() {
-//        WXSDKInstance.
-//      }
-//    },0);
+  public void setPreRenderMode(final boolean isPreRenderMode) {
+    WXSDKManager.getInstance().getWXRenderManager().postOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        WXSDKInstance.this.isPreRenderMode = isPreRenderMode;
+      }
+    },0);
   }
 
 

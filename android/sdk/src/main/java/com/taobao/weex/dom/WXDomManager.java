@@ -133,19 +133,12 @@ public final class WXDomManager {
     }
   }
 
-  void pureRender(String instanceId) {
-    //TODO 是否可以直接调用batch() ???
+  void consumeRenderTask(String instanceId) {
     throwIfNotDomThread();
-//    Iterator<Entry<String, DOMActionContextImpl>> iterator = mDomRegistries.entrySet().iterator();
-//    while (iterator.hasNext()) {
-//      iterator.next().getValue().consumeRenderTasks();
-//    }
-
     DOMActionContextImpl context = mDomRegistries.get(instanceId);
     if(context != null) {
       context.consumeRenderTasks();
     }
-
   }
 
 
