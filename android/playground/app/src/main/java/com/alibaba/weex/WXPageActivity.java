@@ -148,10 +148,11 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
 
 
       //todo orange
-      WXSDKInstance cachedInstance = PreRenderManager.takeCachedInstance(url);
+      PreRenderManager manager = PreRenderManager.getInstance();
+      WXSDKInstance cachedInstance = manager.takeCachedInstance(url);
       if(cachedInstance != null) {
         mInstance = cachedInstance;
-        PreRenderManager.renderFromCache(this,cachedInstance,new SimpleRenderListener() {
+        manager.renderFromCache(this,cachedInstance,new SimpleRenderListener() {
           @Override
           public void onViewCreated(WXSDKInstance instance, View view) {
             if(view.getParent() != null) {

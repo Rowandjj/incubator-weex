@@ -297,8 +297,7 @@ public class WXSDKEngine {
       registerModule("picker", WXPickersModule.class);
       registerModule("meta", WXMetaModule.class,true);
       registerModule("webSocket", WebSocketModule.class);
-      registerModule("preRender", WXPreRenderModule.class);
-
+      registerModule("prerender", WXPreRenderModule.class);
 
       registerDomObject(simpleList, WXListDomObject.class);
       registerDomObject(WXBasicComponentType.INDICATOR, WXIndicator.IndicatorDomNode.class);

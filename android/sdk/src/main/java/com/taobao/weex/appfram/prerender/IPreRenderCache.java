@@ -14,12 +14,13 @@ public interface IPreRenderCache {
     Entry get(String key);
     void put(String key, Entry entry);
     Entry remove(String key);
+    int size();
     void clear();
 
     class Entry {
         public WXSDKInstance data;
         public List<String> ignoreParams;
-        public int version;
+        public String version;
         public long ttl;
         public long lastModified;
         public boolean isFresh() {

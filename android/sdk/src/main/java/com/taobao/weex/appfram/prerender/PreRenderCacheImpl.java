@@ -46,6 +46,11 @@ class PreRenderCacheImpl implements IPreRenderCache {
     }
 
     @Override
+    public int size() {
+        return mInternalCache.size();
+    }
+
+    @Override
     public void clear() {
         mInternalCache.clear();
     }
