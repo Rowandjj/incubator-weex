@@ -85,12 +85,13 @@ public class PreRenderManager {
      * @param listener 渲染结果的回调
      * */
     public void renderFromCache(Context context, WXSDKInstance cachedInstance, IWXRenderListener listener) {
-        if(!mRemoteConfig.isSwitchOn()) {
-            WXLogUtils.d(TAG,"renderFromCache failed. switch is off");
-            return;
-        }
         if(cachedInstance == null || context == null || listener == null) {
             WXLogUtils.e(TAG,"illegal arguments");
+            return;
+        }
+        cachedInstance.mRenderStartTime = System.currentTimeMillis();
+        if(!mRemoteConfig.isSwitchOn()) {
+            WXLogUtils.d(TAG,"renderFromCache failed. switch is off");
             return;
         }
         if(!cachedInstance.isPreRenderMode()) {

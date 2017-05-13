@@ -124,7 +124,7 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
   /**
    * Render start time
    */
-  private long mRenderStartTime;
+  public long mRenderStartTime;
   /**
    * Refresh start time
    */
