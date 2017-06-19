@@ -29,6 +29,7 @@ import com.alibaba.weex.extend.PlayDebugAdapter;
 import com.alibaba.weex.extend.adapter.InterceptWXHttpAdapter;
 import com.alibaba.weex.extend.component.RichText;
 import com.alibaba.weex.extend.component.WXComponentSyncTest;
+import com.alibaba.weex.extend.component.WXGlueView;
 import com.alibaba.weex.extend.component.WXMask;
 import com.alibaba.weex.extend.component.WXParallax;
 import com.alibaba.weex.extend.component.dom.WXMaskDomObject;
@@ -77,6 +78,7 @@ public class WXApplication extends Application {
       Fresco.initialize(this);
       WXSDKEngine.registerComponent("synccomponent", WXComponentSyncTest.class);
       WXSDKEngine.registerComponent(WXParallax.PARALLAX, WXParallax.class);
+      WXSDKEngine.registerComponent("glue", WXGlueView.class);
 
       WXSDKEngine.registerComponent("richtext", RichText.class);
       WXSDKEngine.registerModule("render", RenderModule.class);
