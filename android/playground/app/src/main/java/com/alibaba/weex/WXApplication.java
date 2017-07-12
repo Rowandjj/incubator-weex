@@ -37,6 +37,7 @@ import com.alibaba.weex.extend.module.MyModule;
 import com.alibaba.weex.extend.module.RenderModule;
 import com.alibaba.weex.extend.module.SyncTestModule;
 import com.alibaba.weex.extend.module.WXEventModule;
+import com.alibaba.weex.extend.module.prerender.WXPreRenderModule;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.taobao.weex.InitConfig;
 import com.taobao.weex.WXEnvironment;
@@ -88,6 +89,8 @@ public class WXApplication extends Application {
 
       WXSDKEngine.registerModule("myModule", MyModule.class);
       WXSDKEngine.registerModule("geolocation", GeolocationModule.class);
+      WXSDKEngine.registerModule("prerender", WXPreRenderModule.class);
+
       /**
        * override default image tag
        * WXSDKEngine.registerComponent("image", FrescoImageComponent.class);
