@@ -49,6 +49,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.weex.commons.WXAnalyzerDelegate;
 import com.alibaba.weex.commons.util.ScreenUtil;
 import com.alibaba.weex.constants.Constants;
+import com.alibaba.weex.extend.module.prerender.PreRenderManager;
+import com.alibaba.weex.extend.module.prerender.SimpleRenderListener;
 import com.alibaba.weex.https.HotRefreshManager;
 import com.alibaba.weex.https.WXHttpManager;
 import com.alibaba.weex.https.WXHttpTask;
@@ -133,7 +135,7 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
     initUIAndData();
 
     if(WXPAGE.equals(mUri.getScheme())||
-       TextUtils.equals("true",mUri.getQueryParameter("_wxpage"))) {
+            TextUtils.equals("true",mUri.getQueryParameter("_wxpage"))) {
       mUri = mUri.buildUpon().scheme("http").build();
       loadWXfromService(mUri.toString());
       startHotRefresh();
@@ -142,8 +144,34 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
     }else if (TextUtils.equals("http", mUri.getScheme()) || TextUtils.equals("https", mUri.getScheme())) {
       // if url has key "_wx_tpl" then get weex bundle js
       String weexTpl = mUri.getQueryParameter(Constants.WEEX_TPL_KEY);
-      String url = TextUtils.isEmpty(weexTpl) ? mUri.toString() : weexTpl;
-      loadWXfromService(url);
+      final String url = TextUtils.isEmpty(weexTpl) ? mUri.toString() : weexTpl;
+
+      PreRenderManager manager = PreRenderManager.getInstance();
+      WXSDKInstance cachedInstance = manager.takeCachedInstance(mUri.toString());
+      if(cachedInstance != null) {
+        mInstance = cachedInstance;
+        manager.renderFromCache(this,cachedInstance,new SimpleRenderListener() {
+          @Override
+          public void onViewCreated(WXSDKInstance instance, View view) {
+            if(view.getParent() != null) {
+              ((ViewGroup)view.getParent()).removeView(view);
+            }
+
+            mContainer.addView(view);
+            WXLogUtils.e("CHUYI","load from preRender!!!!");
+            Toast.makeText(WXPageActivity.this,"preRender success",Toast.LENGTH_SHORT).show();
+          }
+
+          @Override
+          public void onException(WXSDKInstance instance, String errCode, String msg) {
+            Toast.makeText(WXPageActivity.this,"preRender failed! \nmsg:"+msg,Toast.LENGTH_SHORT).show();
+            loadWXfromService(url);
+          }
+        });
+      } else {
+        loadWXfromService(url);
+      }
+
       startHotRefresh();
     } else {
       loadWXfromLocal(false);
@@ -186,8 +214,8 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
         mConfigMap.put("bundleUrl", mUri.toString());
         String path = "file".equals(mUri.getScheme()) ? assembleFilePath(mUri) : mUri.toString();
         mInstance.render(TAG, WXFileUtils.loadAsset(path, WXPageActivity.this),
-            mConfigMap, null,
-            WXRenderStrategy.APPEND_ASYNC);
+                mConfigMap, null,
+                WXRenderStrategy.APPEND_ASYNC);
       }
     });
   }
@@ -301,9 +329,9 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
     String id;
     View view;
     if((view = comp.getHostView())!=null &&
-        (dom = comp.getDomObject()) != null &&
-        (id = (String) dom.getAttrs().get("testId"))!=null &&
-        !map.containsKey(id)){
+            (dom = comp.getDomObject()) != null &&
+            (id = (String) dom.getAttrs().get("testId"))!=null &&
+            !map.containsKey(id)){
       Pair<String,Integer> pair = Utility.nextID();
       view.setId(pair.second);
       map.put(id,pair.first);
@@ -454,10 +482,10 @@ public class WXPageActivity extends WXBaseActivity implements IWXRenderListener,
 
   private void degradeAlert(String errMsg) {
     new AlertDialog.Builder(this)
-        .setTitle("Downgrade success")
-        .setMessage(errMsg)
-        .setPositiveButton("OK", null)
-        .show();
+            .setTitle("Downgrade success")
+            .setMessage(errMsg)
+            .setPositiveButton("OK", null)
+            .show();
 
   }
 
